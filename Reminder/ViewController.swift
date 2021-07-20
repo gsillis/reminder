@@ -9,9 +9,8 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    let tableview = UITableView()
-    
     private var model = [TodoItem]()
+    let tableview = UITableView()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
@@ -21,18 +20,40 @@ class ViewController: UIViewController {
         self.tableview.delegate = self
         self.tableview.dataSource = self
         
+        //adiciona o botão add no navVc
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
     }
-
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         tableview.frame = view.bounds
     }
     
+    //MARK: - adiciona um alert e um texfield ao clicar no botao add no navVc
+    @objc private func addButtonTapped() {
+        
+        let alert:UIAlertController = UIAlertController(title: "Adicionar novo lembrete",
+                                                                                message: "Deseja adicionar um novo lembrete?",
+                                                                                preferredStyle: .alert)
+        alert.addTextField(configurationHandler: nil)
+        let submit: UIAlertAction = UIAlertAction(title: "Adicionar", style: .default) { action in
+            guard let textfield = alert.textFields?.first, let text = textfield.text, !text.isEmpty else {
+                return
+            }
+            self.createdItem(name: text)
+        }
+        alert.addAction(submit)
+        self.present(alert, animated: true)
+    }
+    
     
     //MARK: - Core Data
-    func getAllItems() {
+    func getItems() {
         do {
             model =  try context.fetch(TodoItem.fetchRequest())
+            DispatchQueue.main.async {
+                self.tableview.reloadData()
+            }
         } catch  {
             //error
         }
@@ -72,6 +93,7 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return model.count
     }
