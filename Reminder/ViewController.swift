@@ -36,11 +36,11 @@ class ViewController: UIViewController {
                                                                                 message: "Deseja adicionar um novo lembrete?",
                                                                                 preferredStyle: .alert)
         alert.addTextField(configurationHandler: nil)
-        let submit: UIAlertAction = UIAlertAction(title: "Adicionar", style: .default) { action in
+        let submit: UIAlertAction = UIAlertAction(title: "Adicionar", style: .default) { [weak self] action in
             guard let textfield = alert.textFields?.first, let text = textfield.text, !text.isEmpty else {
                 return
             }
-            self.createdItem(name: text)
+            self?.createItem(name: text)
         }
         alert.addAction(submit)
         self.present(alert, animated: true)
@@ -59,13 +59,14 @@ class ViewController: UIViewController {
         }
     }
     
-    func createdItem(name: String) {
+    func createItem(name: String) {
         let newItem = TodoItem(context: context)
         newItem.task = name
         newItem.createdDate = Date()
         
         do {
             try context.save()
+            getItems()
         } catch  {
             //error
         }
@@ -92,6 +93,7 @@ class ViewController: UIViewController {
     }
 }
 
+//MARK: - UITableViewDelegate, UITableViewDataSource
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
