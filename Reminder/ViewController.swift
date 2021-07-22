@@ -19,9 +19,13 @@ class ViewController: UIViewController {
         view.addSubview(tableview)
         self.tableview.delegate = self
         self.tableview.dataSource = self
+        navigationItem.title = "Reminder"
+        getItems()
         
         //adiciona o botão add no navVc
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add,
+                                                                                                target: self,
+                                                                                                action: #selector(addButtonTapped))
     }
     
     override func viewDidLayoutSubviews() {
@@ -32,7 +36,7 @@ class ViewController: UIViewController {
     //MARK: - adiciona um alert e um texfield ao clicar no botao add no navVc
     @objc private func addButtonTapped() {
         
-        let alert:UIAlertController = UIAlertController(title: "Adicionar novo lembrete",
+        let alert:UIAlertController = UIAlertController(title: "Novo lembrete",
                                                                                 message: "Deseja adicionar um novo lembrete?",
                                                                                 preferredStyle: .alert)
         alert.addTextField(configurationHandler: nil)
@@ -55,7 +59,7 @@ class ViewController: UIViewController {
                 self.tableview.reloadData()
             }
         } catch  {
-            //error
+            print(error.localizedDescription)
         }
     }
     
@@ -68,7 +72,7 @@ class ViewController: UIViewController {
             try context.save()
             getItems()
         } catch  {
-            //error
+            print(error.localizedDescription)
         }
     }
     
@@ -77,8 +81,9 @@ class ViewController: UIViewController {
         
         do {
             try context.save()
+            getItems()
         } catch  {
-            //error
+            print(error.localizedDescription)
         }
     }
     
@@ -88,7 +93,7 @@ class ViewController: UIViewController {
         do {
             try context.save()
         } catch  {
-            //error
+            print(error.localizedDescription)
         }
     }
 }
@@ -106,5 +111,13 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         cell.textLabel?.text = models.task
         
         return cell
+    }
+    
+   //Deleta os valores da cell e do core data
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            self.deleteItem(item: self.model[indexPath.row])
+            tableview.deleteRows(at: [indexPath], with: .fade)
+        }
     }
 }
