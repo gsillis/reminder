@@ -35,11 +35,7 @@ class ViewController: UIViewController {
     
     //MARK: - adiciona um alert e um texfield ao clicar no botao add no navVc
     @objc private func addButtonTapped() {
-        
-        let alert:UIAlertController = UIAlertController(title: "Novo lembrete",
-                                                                                message: "Deseja adicionar um novo lembrete?",
-                                                                                preferredStyle: .alert)
-        alert.addTextField(configurationHandler: nil)
+        let alert: UIAlertController = self.alertController(title: "Novo Lembrete", message: "Deseja adicionar um novo lembrete?", style: .alert)
         let submit: UIAlertAction = UIAlertAction(title: "Adicionar", style: .default) { [weak self] action in
             guard let textfield = alert.textFields?.first, let text = textfield.text, !text.isEmpty else {
                 return
@@ -47,9 +43,18 @@ class ViewController: UIViewController {
             self?.createItem(name: text)
         }
         alert.addAction(submit)
-        self.present(alert, animated: true)
     }
     
+    //cria um alert controller
+    func alertController(title: String, message: String? = nil, style: UIAlertController.Style) -> UIAlertController {
+        let alert:UIAlertController = UIAlertController(title: title,
+                                                                                message: message,
+                                                                                preferredStyle: style)
+        alert.addTextField(configurationHandler: nil)
+        self.present(alert, animated: true)
+        
+        return alert
+    }
     
     //MARK: - Core Data
     func getItems() {
@@ -109,15 +114,30 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let models = model[indexPath.row]
         let cell = tableview.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = models.task
+        let holdToEdit: UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressEdit))
+        cell.addGestureRecognizer(holdToEdit)
         
         return cell
     }
     
    //Deleta os valores da cell e do core data
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        let models = model[indexPath.row]
         if editingStyle == .delete {
-            self.deleteItem(item: self.model[indexPath.row])
+            self.deleteItem(item: models)
             tableview.deleteRows(at: [indexPath], with: .fade)
+        }
+    }
+    
+   @objc private func longPressEdit(sender: UILongPressGestureRecognizer) {
+        if sender.state == .began {
+            let alert: UIAlertController = self.alertController(title: "Editar lembrete", style: .alert)
+            let action: UIAlertAction = UIAlertAction(title: "Atualizar", style: .default) { [weak self] action in
+                    guard let textfield = alert.textFields?.first, let text = textfield.text, !text.isEmpty else {
+                        return
+                    }
+                }
+                alert.addAction(action)
         }
     }
 }
