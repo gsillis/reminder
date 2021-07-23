@@ -24,8 +24,8 @@ class ViewController: UIViewController {
         
         //adiciona o botão add no navVc
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add,
-                                                                                                target: self,
-                                                                                                action: #selector(addButtonTapped))
+                                                            target: self,
+                                                            action: #selector(addButtonTapped))
     }
     
     override func viewDidLayoutSubviews() {
@@ -48,8 +48,8 @@ class ViewController: UIViewController {
     //cria um alert controller
     func alertController(title: String, message: String? = nil, style: UIAlertController.Style) -> UIAlertController {
         let alert:UIAlertController = UIAlertController(title: title,
-                                                                                message: message,
-                                                                                preferredStyle: style)
+                                                        message: message,
+                                                        preferredStyle: style)
         alert.addTextField(configurationHandler: nil)
         self.present(alert, animated: true)
         
@@ -114,13 +114,12 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let models = model[indexPath.row]
         let cell = tableview.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = models.task
-        let holdToEdit: UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressEdit))
+        let holdToEdit: UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressEdit(_:)))
         cell.addGestureRecognizer(holdToEdit)
-        
         return cell
     }
     
-   //Deleta os valores da cell e do core data
+    //Deleta os valores da cell e do core data
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         let models = model[indexPath.row]
         if editingStyle == .delete {
@@ -129,15 +128,21 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-   @objc private func longPressEdit(sender: UILongPressGestureRecognizer) {
+    @objc private func longPressEdit(_ sender: UILongPressGestureRecognizer) {
         if sender.state == .began {
             let alert: UIAlertController = self.alertController(title: "Editar lembrete", style: .alert)
-            let action: UIAlertAction = UIAlertAction(title: "Atualizar", style: .default) { [weak self] action in
-                    guard let textfield = alert.textFields?.first, let text = textfield.text, !text.isEmpty else {
-                        return
-                    }
-                }
-                alert.addAction(action)
+            self.actionAlert(title: "Atualizar lembrete", style: .default, alert: alert)
         }
+    }
+    
+    func actionAlert(title: String, style: UIAlertAction.Style, alert: UIAlertController) {
+        let action: UIAlertAction = UIAlertAction(title: title, style: style) { _ in
+        }
+        alert.addAction(action)
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let holdToEdit: UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressEdit))
+        tableview.addGestureRecognizer(holdToEdit)
     }
 }
