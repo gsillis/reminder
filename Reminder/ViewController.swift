@@ -94,9 +94,9 @@ class ViewController: UIViewController {
     
     func updateItem(item: TodoItem, newName: String) {
         item.task = newName
-        
         do {
             try context.save()
+            self.getItems()
         } catch  {
             print(error.localizedDescription)
         }
@@ -114,8 +114,6 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let models = model[indexPath.row]
         let cell = tableview.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = models.task
-        let holdToEdit: UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressEdit(_:)))
-        cell.addGestureRecognizer(holdToEdit)
         return cell
     }
     
@@ -128,21 +126,14 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-    @objc private func longPressEdit(_ sender: UILongPressGestureRecognizer) {
-        if sender.state == .began {
-            let alert: UIAlertController = self.alertController(title: "Editar lembrete", style: .alert)
-            self.actionAlert(title: "Atualizar lembrete", style: .default, alert: alert)
-        }
-    }
-    
-    func actionAlert(title: String, style: UIAlertAction.Style, alert: UIAlertController) {
-        let action: UIAlertAction = UIAlertAction(title: title, style: style) { _ in
-        }
-        alert.addAction(action)
-    }
-    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let holdToEdit: UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressEdit))
-        tableview.addGestureRecognizer(holdToEdit)
+        let model = model[indexPath.row]
+        let alert: UIAlertController = self.alertController(title: "Editar lembrete", style: .alert)
+        alert.textFields?.first?.text = model.task
+        alert.addAction(UIAlertAction(title: "Salvar", style: .default) { [weak self] action in
+            guard let textField = alert.textFields?.first, let newName = textField.text, !newName.isEmpty else { return }
+            self?.updateItem(item: model, newName: newName)
+        })
     }
 }
+
